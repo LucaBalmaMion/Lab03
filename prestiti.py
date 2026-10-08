@@ -4,9 +4,7 @@ class Prestito:
         self.data = data
         self.idStrumento = idStrumento
         self.cognomeAllievo = cognome
-        singoloPrestito = [self.codice, self.data, self.idStrumento, self.cognomeAllievo]
-        self.listaPrestiti.append(singoloPrestito)
-        return singoloPrestito
     def __str__(self):
         b = f'Prestito: {self.codice} {self.data} {self.idStrumento} {self.cognomeAllievo}'
+        return b
 
