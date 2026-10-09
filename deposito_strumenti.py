@@ -1,3 +1,5 @@
+from logging import exception
+
 from strumenti import Strumento
 from prestiti import Prestito
 import csv
@@ -17,11 +19,14 @@ class DepositoStrumenti:
     def carica_file_strumenti(self, file_path):
         """Carica gli strumenti dal file"""
         #devo ancora valutare le eccezioni
-        filein = open(file_path, "r")
-        infile = csv.reader(filein)
-        for line in infile:
-            self.datiStrumenti.append(Strumento(line[0], line[1], line[2], line[3], line[4]))
-        filein.close()
+        try:
+            filein = open(file_path, "r")
+            infile = csv.reader(filein)
+            for line in infile:
+                self.datiStrumenti.append(Strumento(line[0], line[1], line[2], int(line[3]), float(line[4])))
+            filein.close()
+        except FileNotFoundError:
+            print('file non trovato')
 
 
     def aggiungi_strumento(self, tipo, marca, anno_acquisto, valore):
@@ -41,10 +46,22 @@ class DepositoStrumenti:
     def nuovo_prestito(self, data, id_strumento, cognome_allievo):
         """Crea un nuovo prestito"""
         nuovoPrestito = Prestito(data, id_strumento, cognome_allievo, self.contatorePrestiti)
-        self.contatorePrestiti += 1
-        self.listaPrestiti.append(nuovoPrestito)
-        return nuovoPrestito
-
+        strumentoGiaPrestato = False
+        strumentoEsiste = False
+        for el in self.listaPrestiti:
+            if el.idStrumento == id_strumento:
+                strumentoGiaPrestato = True
+        for el in self.datiStrumenti:
+            if el.codice == id_strumento:
+                strumentoEsiste = True
+        if not strumentoGiaPrestato and strumentoEsiste:
+            self.contatorePrestiti += 1
+            self.listaPrestiti.append(nuovoPrestito)
+            return nuovoPrestito
+        elif strumentoGiaPrestato:
+            raise Exception('Errore: Strumento già in prestito')
+        else:
+            raise Exception('Errore: Strumento non trovato')
         # TODO
 
     def termina_prestito(self, id_prestito):
@@ -54,5 +71,5 @@ class DepositoStrumenti:
             if el.codice == id_prestito:
                 self.listaPrestiti.remove(el)
                 return el
-        return None
+        raise Exception('Errore: prestito non trovato')
 
